@@ -2,28 +2,34 @@ extends Node
 
 export(PackedScene) var mob_scene
 var score
+var lives: int = 3 #start with 3 lives (MI)
+var hearts: float = lives
 
 func _ready():
 	randomize()
 
 
 func game_over():
-	$ScoreTimer.stop()
-	$MobTimer.stop()
-	$HUD.show_game_over()
-	$Music.stop()
-	$DeathSound.play()
+	# BUG: lives = 0 is satisfied acc to console but unsure why it won't work. (MI)
+	if hearts == 0: #if lives are 0 only then call game over. (MI)
+		$ScoreTimer.stop()
+		$MobTimer.stop()
+		$HUD.show_game_over()
+		$Music.stop()
+		$DeathSound.play()
 
 
 func new_game():
 	get_tree().call_group("mobs", "queue_free")
 	score = 0
+	hearts = lives
 	$Player.start($StartPosition.position)
 	$StartTimer.start()
 	$HUD.update_score(score)
 	$HUD.show_message("Get Ready")
 	$Music.play()
-
+	
+	print(hearts)
 
 func _on_MobTimer_timeout():
 	# Create a new instance of the Mob scene.
@@ -53,7 +59,6 @@ func _on_MobTimer_timeout():
 func _on_ScoreTimer_timeout():
 	score += 1
 	$HUD.update_score(score)
-
 
 func _on_StartTimer_timeout():
 	$MobTimer.start()
